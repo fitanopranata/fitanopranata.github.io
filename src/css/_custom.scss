@@ -1,0 +1,71 @@
+// Here you can add other styles
+.modal.modal-static .modal-dialog {
+    -webkit-transform: none !important;
+    transform: none !important;
+  }
+
+.modal {
+  background-color: rgba($color: #000000, $alpha: 0.4);
+}
+
+thead {
+  background-color: transparent !important;
+}
+
+tbody th {
+  font-weight: 400 !important;
+}
+
+.scanContainer {
+  position:fixed;
+	width:50px;
+	height:50px;
+	bottom:70px;
+	right:40px;
+	background-color:#321FDB;
+	color:#FFF;
+	border-radius:50px;
+	text-align:center;
+	box-shadow: 2px 2px 3px #999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.scanButton {
+  background-color: #000000;
+  border-radius: 50%;
+  border-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.productSuggestionContainer {
+  background-color: #FFF;
+  box-shadow: 0 2px 2px rgba(0,0,0,0.4);
+}
+
+.productSuggestionList {
+  padding-left: 10px;
+  padding-right: 5px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+}
+
+.productSuggestionList.active {
+  background-color: rgb(215, 215, 215);
+}
+
+.productSuggestionList:hover {
+  background-color: rgb(215, 215, 215);
+}
+
+@media only screen and (max-width: 600px) {
+  .productSuggestionCol {
+    padding-right: 0 !important;
+  }
+}

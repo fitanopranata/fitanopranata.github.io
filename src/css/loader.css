@@ -1,0 +1,16 @@
+.layout {
+    text-align: center;
+  }
+  
+  .background {
+    background: rgba(0,0,0, 0.2);
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
+    /* width: 100vw; */
+  }
+  
