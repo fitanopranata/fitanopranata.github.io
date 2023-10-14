@@ -8,9 +8,10 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { useRef } from 'react';
-import QrScanner from 'qr-scanner';
+import success from '../images/success.mp3'
+// import QrScanner from 'qr-scanner';
 // import {QrReader} from 'react-qr-reader'
-// import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 // import Html5QrcodePlugin from '../components/Scanner.js';
 
 const Transactions = () => {
@@ -33,6 +34,8 @@ const Transactions = () => {
     const [isScanned, setIsScanned] = useState(false)
     const [isScannerShowed, setIsScannerShowed] = useState(false)
 
+    const successSound = new Audio(success)
+
     const videoRef = useRef(null)
 
     useEffect(() => {
@@ -46,82 +49,95 @@ const Transactions = () => {
             getCheckoutTemp()
         }
 
-        if (isScanned) {
-            stopScan()
-            setIsScannerShowed(false)
-            setScanModal(false)
-            setIsScanned(false)
+        // if (isScanned) {
+        //     stopScan()
+        //     setIsScannerShowed(false)
+        //     setIsScanned(false)
+        // }
+
+        // if (isScannerShowed) {
+        //     startScan()
+        // }
+
+        let qrboxFunction = function(viewfinderWidth, viewfinderHeight) {
+            let minEdgePercentage = 0.7; // 70%
+            let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+            let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
+            return {
+                width: qrboxSize,
+                height: qrboxSize
+            };
         }
 
         if (isScannerShowed) {
-            startScan()
-        }
-
-        // const scanner = new Html5QrcodeScanner(reader, {
-        //     qrbox: {
-        //         width: 250,
-        //         height: 250
-        //     },
-        //     fps: 5
-        // })
-    
-        // scanner.render(success, error)
-    
-        // function success (result) {
-        //     scanner.clear()
-        //     setScanModal(false)
-        //     setScanResult(result)
-        // }
-    
-        // function error (err) {
-        //     console.warn(err)
-        // }
+            const aspectRatio = window.innerWidth / window.innerHeight
+            const scanner = new Html5QrcodeScanner(videoRef, {
+                qrbox: qrboxFunction,
+                fps: 10,
+                videoConstraints: {
+                    facingMode: 'environment',
+                    aspectRatio: aspectRatio
+                }
+            })
         
-    }, [user, searchProduct, isScanned, isScannerShowed])
+            scanner.render(success, error)
+        
+            function success (result) {
+                scanner.clear()
+                getProductByCode(result)
+                setIsScannerShowed(false)
+                // setScanModal(false)
+                // setScanResult(result)
+            }
+        
+            function error (err) {
+                console.warn(err)
+            }
+        }
+        
+    }, [user, searchProduct, isScanned, isScannerShowed, videoRef])
 
     const showScanModal = () => {
         // setScanModal(!scanModal)
         setIsScannerShowed(true)
     }
 
-    const startScan = async () => {
-        const qrScanner = new QrScanner(videoRef.current, (result) => handleScan(result), {
-            highlightScanRegion: true,
-            returnDetailedScanResult: true,
-            maxScansPerSecond: 1
-          });
-          qrScanner.start();
-        //   qrScanner.setCamera('environment')
-          setQrScanner(qrScanner);
-    }
+    // const startScan = async () => {
+    //     const qrScanner = new QrScanner(videoRef.current, (result) => handleScan(result), {
+    //         highlightScanRegion: true,
+    //         returnDetailedScanResult: true,
+    //         maxScansPerSecond: 1
+    //       });
+    //       qrScanner.start();
+    //       setQrScanner(qrScanner);
+    // }
 
-    function stopScan(){
-        if (qrScanner) {
-            qrScanner.stop()
-            qrScanner.destroy()
-            setQrScanner(undefined)
-        }
-        // qrScanner?.stop();
-        // qrScanner?.destroy();
-        // setQrScanner(undefined);
-    }
+    // function stopScan(){
+    //     if (qrScanner) {
+    //         qrScanner.stop()
+    //         qrScanner.destroy()
+    //         setQrScanner(undefined)
+    //     }
+    //     // qrScanner?.stop();
+    //     // qrScanner?.destroy();
+    //     // setQrScanner(undefined);
+    // }
 
-    function handleScan(result) {
-        if (!isScanned) {
-            setIsScanned(true)
-            // setInputProductCode(result.data)
-            getProductByCode(result.data)
-        }
-        // if (result.data) {
-        //     getProductByCode(result.data, function() {
-        //         stopScan()
-        //     })
-        //     // setScanResult(result.data)
-        //     // getProductByCodeScan()
-        //     // qrScanner?.destroy();
-        //     // setScanModal(false)
-        // }
-      }
+    // function handleScan(result) {
+    //     if (!isScanned) {
+    //         setIsScanned(true)
+    //         getProductByCode(result.data)
+    //     }
+    //     // if (result.data) {
+    //     //     getProductByCode(result.data, function() {
+    //     //         stopScan()
+    //     //     })
+    //     //     // setScanResult(result.data)
+    //     //     // getProductByCodeScan()
+    //     //     // qrScanner?.destroy();
+    //     //     // setScanModal(false)
+    //     // }
+    //   }
 
     const getProductByName = async () => {
         try {
@@ -175,6 +191,7 @@ const Transactions = () => {
                 createdBy: user.name
             })
             if (response.data.status === true) {
+                successSound.play()
                 setMessage(response.data.message)
                 setTimeout(() => {
                     setMessage('')
@@ -210,18 +227,11 @@ const Transactions = () => {
         }
     }
 
-    
-
-    // const onNewScanResult = (decodedText, decodedResult) => {
-    //     setScanModal(false)
-    //     getProductByCode(decodedText)
-    // }
-
     return (
         <>
         {
             isScannerShowed ?
-            <video ref={videoRef} style={{ height: '100%', width: '100%' }}></video> :
+            <div id={videoRef} style={{ height: '100vh' }}></div> :
         
         <Layout>
             <CButton className="scanContainer" onClick={showScanModal}>
@@ -238,8 +248,8 @@ const Transactions = () => {
                     <CButton color="secondary" onClick={() => setScanModal(false)}>
                             Close
                     </CButton>
-                    <CButton color='primary' onClick={startScan}>Scan</CButton>
-                    <CButton color='danger' onClick={stopScan}>Stop</CButton>
+                    {/* <CButton color='primary' onClick={startScan}>Scan</CButton>
+                    <CButton color='danger' onClick={stopScan}>Stop</CButton> */}
                 </CModalFooter>
             </CModal>
             <CContainer>
